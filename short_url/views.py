@@ -8,7 +8,7 @@ from flask_redis import FlaskRedis
 
 from short_url import redis_store, app
 from short_url.number_sender import get_number
-from short_url.utils.decorators import crossdomain
+from short_url.decorator import crossdomain
 
 short_url_api = Blueprint('short', __name__)
 EXPIRE_TIME_DELTA = app.config['EXPIRE_TIME_DELTA']
