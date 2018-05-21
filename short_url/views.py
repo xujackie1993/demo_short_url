@@ -3,21 +3,23 @@
 
 from datetime import datetime, timedelta
 import requests
+import config
 from flask import Blueprint, request, redirect, jsonify
 from flask_redis import FlaskRedis
 
-from short_url import redis_store, app
+# from short_url import redis_store, app
 from short_url.number_sender import get_number
 from short_url.decorator import crossdomain
 
 short_url_api = Blueprint('short', __name__)
-EXPIRE_TIME_DELTA = app.config['EXPIRE_TIME_DELTA']
-HOST = app.config["HOST"]
-redis_store = FlaskRedis(app)
+EXPIRE_TIME_DELTA = config.EXPIRE_TIME_DELTA
+HOST = config.HOST
+# redis_store = FlaskRedis(app)
 
 @short_url_api.route('/', methods=['POST'])
 @crossdomain('*')
 def shorten():
+    return "hello"
     url = request.form.get('url')
     short_url = redis_store.get(url)
     if short_url is None:
