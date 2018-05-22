@@ -3,23 +3,28 @@
 
 from datetime import datetime, timedelta
 import requests
+import config
 from flask import Blueprint, request, redirect, jsonify
-from flask_redis import FlaskRedis
-
-from short_url import redis_store, app
+from short_url import redis_store
 from short_url.number_sender import get_number
 from short_url.decorator import crossdomain
 
 short_url_api = Blueprint('short', __name__)
-EXPIRE_TIME_DELTA = app.config['EXPIRE_TIME_DELTA']
-HOST = app.config["HOST"]
-redis_store = FlaskRedis(app)
+EXPIRE_TIME_DELTA = config.EXPIRE_TIME_DELTA
+HOST = config.HOST
 
-@short_url_api.route('/', methods=['POST'])
+
+@short_url_api.route('/')
+@crossdomain('*')
+def index():
+    return "hello"
+
+@short_url_api.route('/post', methods=["POST"])
 @crossdomain('*')
 def shorten():
     url = request.form.get('url')
     short_url = redis_store.get(url)
+    print(short_url)
     if short_url is None:
         short_url = get_number()
         redis_store.set(short_url, url)
@@ -31,8 +36,8 @@ def shorten():
         expire_time = datetime.now() + timedelta(seconds=EXPIRE_TIME_DELTA)
         redis_store.expireat(url, expire_time)
 
-    if mod.url_prefix:
-        rv = '{0}{1}/{2}'.format(HOST, mod.url_prefix, short_url)
+    if short_url_api.url_prefix:
+        rv = '{0}{1}/{2}'.format(HOST, short_url_api.url_prefix, short_url)
     else:
         rv = '{0}/{1}'.format(HOST, short_url)
     return jsonify({'data': rv})
