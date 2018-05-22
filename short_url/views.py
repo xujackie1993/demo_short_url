@@ -23,8 +23,8 @@ def index():
 @crossdomain('*')
 def shorten():
     url = request.form.get('url')
+    print(url)
     short_url = redis_store.get(url)
-    print(short_url)
     if short_url is None:
         short_url = get_number()
         redis_store.set(short_url, url)
