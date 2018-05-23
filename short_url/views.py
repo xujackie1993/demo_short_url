@@ -4,6 +4,7 @@
 from datetime import datetime, timedelta
 import requests
 import config
+import six
 from flask import Blueprint, request, redirect, jsonify
 from short_url import redis_store
 from short_url.number_sender import get_number
@@ -23,7 +24,7 @@ def index():
 @crossdomain('*')
 def shorten():
     url = request.form.get('url')
-    short_url = redis_store.get(url).decode("utf-8")
+    short_url = redis_store.get(url)
     if short_url is None:
         short_url = get_number()
         redis_store.set(short_url, url)
@@ -34,7 +35,8 @@ def shorten():
     else:
         expire_time = datetime.now() + timedelta(seconds=EXPIRE_TIME_DELTA)
         redis_store.expireat(url, expire_time)
-
+    if not isinstance(short_url, six.string_types):
+        short_url = short_url.decode("utf-8")
     if short_url_api.url_prefix:
         rv = '{0}{1}/{2}'.format(HOST, short_url_api.url_prefix, short_url)
     else:
